@@ -1,4 +1,45 @@
 // ============================================
+// 用户进度初始化（放在文件最开头）
+// ============================================
+window.userProgress = window.userProgress || {
+    mapLocations: {
+        visited: []
+    },
+    achievements: {
+        unlocked: []
+    },
+    learningHistory: [],
+    completedTasks: [],
+    visitedArtifacts: []
+};
+
+// 保存函数
+window.saveUserProgress = function() {
+    try {
+        localStorage.setItem('redMuseumProgress', JSON.stringify(window.userProgress));
+        console.log('学习进度已保存');
+    } catch (e) {
+        console.log('保存失败', e);
+    }
+};
+
+// 加载函数
+window.loadUserProgress = function() {
+    try {
+        const saved = localStorage.getItem('redMuseumProgress');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            window.userProgress = { ...window.userProgress, ...parsed };
+            console.log('已加载用户学习进度');
+        }
+    } catch (e) {
+        console.log('加载失败', e);
+    }
+};
+
+// 执行加载
+loadUserProgress();
+// ============================================
 // 1. 文物数据 - 模拟数据库
 // ============================================
 const artifactsData = [
