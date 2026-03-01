@@ -2691,6 +2691,21 @@ function initAMap() {
 // 创建美观标记（包含所有功能）
 // ============================================
 function createBeautifulMarker(location) {
+    // ===== 添加这8行安全代码 =====
+    // 确保 userProgress 存在
+    if (!window.userProgress) {
+        window.userProgress = {};
+    }
+    if (!window.userProgress.mapLocations) {
+        window.userProgress.mapLocations = { visited: [] };
+    }
+    if (!window.userProgress.mapLocations.visited) {
+        window.userProgress.mapLocations.visited = [];
+    }
+    // ============================
+    
+    const isVisited = userProgress.mapLocations.visited.includes(location.id);
+function createBeautifulMarker(location) {
     const isVisited = userProgress.mapLocations.visited.includes(location.id);
     
     // 标记HTML样式（美观部分）
@@ -3436,8 +3451,29 @@ const exhibitionsData = {
 };
 
 // 2. 加载全景展厅
-function loadPanorama(exhibitionId) {
-    console.log("加载展厅:", exhibitionId);
+function loadPanorama(exhibitionId, event) {
+    console.log('加载展厅:', exhibitionId);
+    
+    // ===== 添加安全判断 =====
+    // 只有当 event 存在时才更新按钮样式
+    if (event && event.target && event.target.classList) {
+        document.querySelectorAll('.exhibition-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+    } else {
+        // 如果没有 event，根据 exhibitionId 设置激活状态
+        document.querySelectorAll('.exhibition-btn').forEach(btn => {
+            if (exhibitionId === 'xibaipo' && btn.textContent.includes('西柏坡')) {
+                btn.classList.add('active');
+            } else if (exhibitionId === 'yanan' && btn.textContent.includes('延安')) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+    // =========================
     
     const exhibition = exhibitionsData[exhibitionId];
     if (!exhibition) {
