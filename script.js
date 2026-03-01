@@ -2647,23 +2647,44 @@ let markers = []; // 存储所有标记点
 let infoWindow = null; // 信息窗口实例
 let currentRoute = null; // 当前路线
 
-// 3. 初始化地图
+// ============================================
+// 初始化地图（带安全密钥）
+// ============================================
 function initAMap() {
-    // 申请的高德API Key
-    const amapKey = '678476efa0efef3b33fe85620f03b6e5';
+    // 高德API Key
+    const amapKey = '678476efa0efef3b33fe85620f03b6e5';  // 替换成你的Key
     
-    // 动态加载高德地图JS API
-    if (!window.AMap) {
-        const script = document.createElement('script');
-        script.src = `https://webapi.amap.com/maps?v=2.0&key=${amapKey}&plugin=AMap.DistrictLayer,AMap.PolyEditor,AMap.MarkerClusterer`;
-        script.async = true;
-        script.onload = function() {
-            createMap();
-        };
-        document.head.appendChild(script);
-    } else {
+    const securityJsCode = '4fe8ddad24d2061d4a5d012783b07689';  // 替换成你的安全密钥
+    
+    window._AMapSecurityConfig = {
+        securityJsCode: securityJsCode  // 直接配置安全密钥
+        // 如果是生产环境，也可以用代理服务器方式：serviceHost: '你的代理地址/_AMapService'
+    };
+    
+    // 2. 如果已经加载过，直接创建地图
+    if (window.AMap) {
         createMap();
+        return;
     }
+    
+    // 3. 动态加载高德地图（注意：不需要在URL中加安全密钥）
+    const script = document.createElement('script');
+    script.src = `https://webapi.amap.com/maps?v=2.0&key=${amapKey}`;  // URL中只带Key
+    script.async = true;
+    script.onload = function() {
+        console.log('高德地图加载成功');
+        setTimeout(createMap, 300);
+    };
+    script.onerror = function() {
+        console.error('高德地图加载失败');
+        document.getElementById('mapContainer').innerHTML = `
+            <div style="padding:50px; text-align:center; color:#666;">
+                <h3>地图加载失败</h3>
+                <p>请检查API Key和安全密钥配置</p>
+            </div>
+        `;
+    };
+    document.head.appendChild(script);
 }
 // 创建更美观的标记点 2026 2 17 新年快乐小邓  ；）
 // ============================================
@@ -2871,45 +2892,65 @@ function showLocationDetail(location) {
         document.querySelector('.location-detail-modal').remove();
     };
 }
-
-// 4. 创建地图实例
+// ============================================
+// 创建地图（修正版）
+// ============================================
 function createMap() {
-    // 创建地图实例，覆盖京津冀区域
+    // 创建地图实例
     amap = new AMap.Map('mapContainer', {
-        zoom: 8, // 缩放级别
-        center: [116.407526, 39.904030], // 中心点(北京)
-        mapStyle: 'amap://styles/light', // 地图样式
-        viewMode: '2D', // 2D地图
+        zoom: 8,
+        center: [116.407526, 39.904030],
+        mapStyle: 'amap://styles/light',
+        viewMode: '2D',
         resizeEnable: true,
         zoomEnable: true,
         dragEnable: true
     });
     
-    // 添加京津冀行政区划轮廓
+    // ===== 修正：高德地图2.0控件添加方式 =====
+    // 添加比例尺
+    if (AMap.Scale) {
+        amap.addControl(new AMap.Scale());
+    } else {
+        console.log('Scale控件不可用，跳过');
+    }
+    
+    // 添加工具条
+    if (AMap.ToolBar) {
+        amap.addControl(new AMap.ToolBar({
+            position: 'RT'  // 右上角
+        }));
+    }
+    
+    // 添加鹰眼（可选）
+    if (AMap.HawkEye) {
+        amap.addControl(new AMap.HawkEye({
+            opened: false  // 默认关闭
+        }));
+    }
+    
+    // 添加地图类型切换（可选）
+    if (AMap.MapType) {
+        amap.addControl(new AMap.MapType({
+            defaultType: 0  // 默认普通地图
+        }));
+    }
+    // ========================================
+    
+    // 添加京津冀轮廓
     addRegionBoundary();
     
-    // 添加所有红色遗址标记
+    // 添加所有遗址标记
     addBeautifulMarkers();
-    // 添加预览框容器
-    const previewContainer = document.createElement('div');
-    previewContainer.id = 'locationPreview';
-    document.getElementById('mapContainer').appendChild(previewContainer);
     
-    // 初始化信息窗口
-    infoWindow = new AMap.InfoWindow({
-        offset: new AMap.Pixel(0, -30),
-        closeWhenClickMap: true
-    });
-    
-    // 添加地图控件
-    amap.addControl(new AMap.Scale());
-    amap.addControl(new AMap.ToolBar());
-    amap.addControl(new AMap.HawkEye());
-    amap.addControl(new AMap.MapType());
-    
-    // 更新统计信息
+    // 更新统计
     updateMapStats();
     updateLocationList();
+    
+    // 添加预览框容器
+    addPreviewContainer();
+    
+    console.log('地图创建成功');
 }
 // 添加美观标记点
 function addBeautifulMarkers() {
@@ -3770,33 +3811,44 @@ const exhibitionsConfig = {
 // 当前展厅ID
 let currentExhibitionId = 'xibaipo';
 
-// 加载展厅函数（简化版）
-function loadExhibition(exhibitionId) {
+// ============================================
+// 加载展厅（修正版）
+// ============================================
+function loadExhibition(exhibitionId, event) {
     console.log('切换展厅:', exhibitionId);
-    currentExhibitionId = exhibitionId;
     
-    // 更新按钮状态
-    document.querySelectorAll('.exhibition-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    event.target.classList.add('active');
+    // 安全处理：如果有event参数才更新按钮样式
+    if (event && event.target && event.target.classList) {
+        document.querySelectorAll('.exhibition-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+    } else {
+        // 如果没有event，根据exhibitionId设置active
+        document.querySelectorAll('.exhibition-btn').forEach(btn => {
+            const isActive = (exhibitionId === 'xibaipo' && btn.textContent.includes('西柏坡')) ||
+                            (exhibitionId === 'yanan' && btn.textContent.includes('延安'));
+            btn.classList.toggle('active', isActive);
+        });
+    }
     
     const exhibition = exhibitionsConfig[exhibitionId];
     if (!exhibition) return;
     
-    // 清空容器，保持黑屏效果
+    // 清空容器
     const container = document.getElementById('exhibitionContainer');
+    if (!container) return;
+    
     container.innerHTML = '';
     container.style.background = 'black';
     
-    // 延迟加载，避免卡顿
+    // 加载iframe
     setTimeout(() => {
-        // 创建iframe
         const iframe = document.createElement('iframe');
         iframe.id = '720yunIframe';
         iframe.src = exhibition.url;
         iframe.title = exhibition.title + ' - 360度虚拟展厅';
-        iframe.allow = 'fullscreen; vr';
+        iframe.allow = 'fullscreen; vr; xr-spatial-tracking';
         iframe.allowFullscreen = true;
         iframe.frameBorder = '0';
         iframe.scrolling = 'no';
@@ -3808,14 +3860,12 @@ function loadExhibition(exhibitionId) {
         `;
         
         container.appendChild(iframe);
-        
-        // 更新侧边栏信息
         updateSidebarInfo(exhibition);
         
-        // 记录访问
-        recordExhibitionVisit(exhibitionId);
-        
-        console.log('展厅已加载:', exhibition.title);
+        // 安全调用记录函数
+        if (typeof recordExhibitionVisit === 'function') {
+            recordExhibitionVisit(exhibitionId);
+        }
     }, 300);
 }
 
@@ -4404,3 +4454,30 @@ function changeWindowSize(size) {
 
 // 页面加载
 setTimeout(addAIAssistant, 2000);
+// ============================================
+// 添加预览框容器
+// ============================================
+function addPreviewContainer() {
+    const mapContainer = document.getElementById('mapContainer');
+    if (!mapContainer) return;
+    
+    if (!document.getElementById('locationPreview')) {
+        const preview = document.createElement('div');
+        preview.id = 'locationPreview';
+        preview.style.cssText = `
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            z-index: 999;
+            max-width: 300px;
+            display: none;
+            border-left: 4px solid #b71c1c;
+            pointer-events: none;
+        `;
+        mapContainer.appendChild(preview);
+    }
+}
