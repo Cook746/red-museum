@@ -3653,3 +3653,76 @@ body {
         display: none;  /* 隐藏资源库和进度 */
     }
 }
+/* ============================================
+   AI机器人提示气泡
+============================================ */
+
+#ai-assistant {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+}
+
+/* 提示气泡 */
+#ai-assistant::before {
+    content: '👋 需要帮助吗？点我！';
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    background: white;
+    color: #333;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    border-left: 4px solid #b71c1c;
+    animation: slideInLeft 0.5s ease, fadeOut 0.5s ease 4s forwards;
+    pointer-events: none;
+}
+
+/* 气泡小三角 */
+#ai-assistant::after {
+    content: '';
+    position: absolute;
+    bottom: 60px;
+    right: 20px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+    animation: fadeOut 0.5s ease 4s forwards;
+    pointer-events: none;
+}
+
+/* 滑入动画 */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* 淡出动画（5秒后消失） */
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+/* 手机端适配 */
+@media (max-width: 768px) {
+    #ai-assistant::before {
+        white-space: normal;
+        width: 150px;
+        text-align: center;
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+}
