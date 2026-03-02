@@ -2703,6 +2703,23 @@ function createBeautifulMarker(location) {
     if (!userProgress.mapLocations) {
         userProgress.mapLocations = { visited: [] };
     }
+    
+    // 验证坐标
+    if (!location.coordinates || 
+        !Array.isArray(location.coordinates) || 
+        location.coordinates.length !== 2) {
+        console.error('地点坐标格式错误:', location.name, location.coordinates);
+        return null;
+    }
+    
+    const lng = parseFloat(location.coordinates[0]);
+    const lat = parseFloat(location.coordinates[1]);
+    
+    if (isNaN(lng) || isNaN(lat)) {
+        console.error('地点坐标无效:', location.name, location.coordinates);
+        return null;
+    }
+    
     const isVisited = userProgress.mapLocations.visited.includes(location.id);
     
     // 标记HTML样式（美观部分）
@@ -2989,12 +3006,29 @@ function createMap() {
 }
 // 添加美观标记点
 function addBeautifulMarkers() {
-    markers = redLocationsData.map(location => createBeautifulMarker(location));
+    // 过滤掉无效的地点（坐标错误）
+    const validLocations = redLocationsData.filter(location => {
+        if (!location.coordinates || !Array.isArray(location.coordinates)) {
+            console.warn('跳过无效地点（无坐标）:', location.name);
+            return false;
+        }
+        const lng = parseFloat(location.coordinates[0]);
+        const lat = parseFloat(location.coordinates[1]);
+        return !isNaN(lng) && !isNaN(lat);
+    });
+    
+    console.log('有效地点数量:', validLocations.length);
+    
+    markers = validLocations.map(location => createBeautifulMarker(location))
+                             .filter(marker => marker !== null);
     
     // 添加到地图
     markers.forEach(marker => {
         amap.add(marker);
     });
+    
+    console.log('成功添加', markers.length, '个标记点');
+
     
     // 为国家级遗址添加特殊效果
     const nationalSites = markers.filter(marker => 
@@ -3082,60 +3116,49 @@ function addRegionBoundary() {
 
 // 6. 添加红色遗址标记
 function addRedLocationMarkers() {
+    console.log('添加红色遗址标记，共', redLocationsData.length, '个地点');
+    
     // 清空现有标记
     markers.forEach(marker => marker.setMap(null));
     markers = [];
     
-    // 创建标记点集群
+    // 创建标记点
     const markerList = redLocationsData.map(location => {
+        // 确保坐标是数字
+        const lng = parseFloat(location.coordinates[0]);
+        const lat = parseFloat(location.coordinates[1]);
+        
+        if (isNaN(lng) || isNaN(lat)) {
+            console.error('地点坐标无效:', location.name, location.coordinates);
+            return null;
+        }
+        
         const marker = new AMap.Marker({
-            position: new AMap.LngLat(location.coordinates[0], location.coordinates[1]),
+            position: [lng, lat],  // 直接传数组，不用 new AMap.LngLat
             title: location.name,
-            extData: location, // 存储自定义数据
+            extData: location,
             offset: new AMap.Pixel(-15, -15),
             content: createMarkerContent(location)
         });
         
         // 添加点击事件
         marker.on('click', function(e) {
-            showLocationInfo(location, marker.getPosition());
+            showLocationInfo(location, e.lnglat);  // 使用事件中的坐标
             markAsVisited(location.id);
         });
         
         return marker;
-    });
+    }).filter(marker => marker !== null);  // 过滤掉无效的标记
     
-    // 使用点聚合提高性能（当缩放级别较小时）
-    const markerCluster = new AMap.MarkerClusterer(amap, markerList, {
-        gridSize: 80, // 聚合网格像素大小
-        maxZoom: 12, // 最大聚合级别
-        renderClusterMarker: function(context) {
-            const count = context.count;
-            const div = document.createElement('div');
-            div.className = 'cluster-marker';
-            div.innerHTML = `
-                <div style="
-                    width: 40px; height: 40px; 
-                    background: rgba(183, 28, 28, 0.9); 
-                    border-radius: 50%; 
-                    border: 3px solid white;
-                    color: white; 
-                    font-weight: bold; 
-                    font-size: 14px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-                ">
-                    ${count}
-                </div>
-            `;
-            return div;
-        }
+    // 添加到地图
+    markerList.forEach(marker => {
+        amap.add(marker);
     });
     
     markers = markerList;
+    console.log('成功添加', markers.length, '个标记点');
 }
+
 
 // 7. 创建自定义标记内容
 function createMarkerContent(location) {
