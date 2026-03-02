@@ -1,44 +1,4 @@
-// ============================================
-// 用户进度初始化（放在文件最开头）
-// ============================================
-window.userProgress = window.userProgress || {
-    mapLocations: {
-        visited: []
-    },
-    achievements: {
-        unlocked: []
-    },
-    learningHistory: [],
-    completedTasks: [],
-    visitedArtifacts: []
-};
 
-// 保存函数
-window.saveUserProgress = function() {
-    try {
-        localStorage.setItem('redMuseumProgress', JSON.stringify(window.userProgress));
-        console.log('学习进度已保存');
-    } catch (e) {
-        console.log('保存失败', e);
-    }
-};
-
-// 加载函数
-window.loadUserProgress = function() {
-    try {
-        const saved = localStorage.getItem('redMuseumProgress');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            window.userProgress = { ...window.userProgress, ...parsed };
-            console.log('已加载用户学习进度');
-        }
-    } catch (e) {
-        console.log('加载失败', e);
-    }
-};
-
-// 执行加载
-loadUserProgress();
 // ============================================
 // 1. 文物数据 - 模拟数据库
 // ============================================
@@ -2732,21 +2692,6 @@ function initAMap() {
 // 创建美观标记（包含所有功能）
 // ============================================
 function createBeautifulMarker(location) {
-    // ===== 添加这8行安全代码 =====
-    // 确保 userProgress 存在
-    if (!window.userProgress) {
-        window.userProgress = {};
-    }
-    if (!window.userProgress.mapLocations) {
-        window.userProgress.mapLocations = { visited: [] };
-    }
-    if (!window.userProgress.mapLocations.visited) {
-        window.userProgress.mapLocations.visited = [];
-    }
-    // ============================
-    
-    const isVisited = userProgress.mapLocations.visited.includes(location.id);
-function createBeautifulMarker(location) {
     const isVisited = userProgress.mapLocations.visited.includes(location.id);
     
     // 标记HTML样式（美观部分）
@@ -2948,6 +2893,7 @@ function showLocationDetail(location) {
         document.querySelector('.location-detail-modal').remove();
     };
 }
+
 // ============================================
 // 创建地图（修正版）
 // ============================================
@@ -3002,11 +2948,26 @@ function createMap() {
     // 更新统计
     updateMapStats();
     updateLocationList();
-    
     // 添加预览框容器
-    addPreviewContainer();
+    const previewContainer = document.createElement('div');
+    previewContainer.id = 'locationPreview';
+    document.getElementById('mapContainer').appendChild(previewContainer);
     
-    console.log('地图创建成功');
+    // 初始化信息窗口
+    infoWindow = new AMap.InfoWindow({
+        offset: new AMap.Pixel(0, -30),
+        closeWhenClickMap: true
+    });
+    
+    // 添加地图控件
+    amap.addControl(new AMap.Scale());
+    amap.addControl(new AMap.ToolBar());
+    amap.addControl(new AMap.HawkEye());
+    amap.addControl(new AMap.MapType());
+    
+    // 更新统计信息
+    updateMapStats();
+    updateLocationList();
 }
 // 添加美观标记点
 function addBeautifulMarkers() {
@@ -3492,29 +3453,8 @@ const exhibitionsData = {
 };
 
 // 2. 加载全景展厅
-function loadPanorama(exhibitionId, event) {
-    console.log('加载展厅:', exhibitionId);
-    
-    // ===== 添加安全判断 =====
-    // 只有当 event 存在时才更新按钮样式
-    if (event && event.target && event.target.classList) {
-        document.querySelectorAll('.exhibition-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.classList.add('active');
-    } else {
-        // 如果没有 event，根据 exhibitionId 设置激活状态
-        document.querySelectorAll('.exhibition-btn').forEach(btn => {
-            if (exhibitionId === 'xibaipo' && btn.textContent.includes('西柏坡')) {
-                btn.classList.add('active');
-            } else if (exhibitionId === 'yanan' && btn.textContent.includes('延安')) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-    }
-    // =========================
+function loadPanorama(exhibitionId) {
+    console.log("加载展厅:", exhibitionId);
     
     const exhibition = exhibitionsData[exhibitionId];
     if (!exhibition) {
@@ -4531,4 +4471,3 @@ function changeWindowSize(size) {
 
 // 页面加载
 setTimeout(addAIAssistant, 2000);
-}
