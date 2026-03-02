@@ -2920,35 +2920,42 @@ function createMap() {
         dragEnable: true
     });
     
-    // ===== 修正：高德地图2.0控件添加方式 =====
-    // 添加比例尺
-    if (AMap.Scale) {
-        amap.addControl(new AMap.Scale());
-    } else {
-        console.log('Scale控件不可用，跳过');
+    // ===== 修改这部分：使用更安全的控件添加方式 =====
+    try {
+        // 添加比例尺（使用插件方式）
+        AMap.plugin(['AMap.Scale', 'AMap.ToolBar', 'AMap.HawkEye', 'AMap.MapType'], function() {
+            // 添加比例尺
+            if (AMap.Scale) {
+                amap.addControl(new AMap.Scale());
+                console.log('比例尺添加成功');
+            }
+            
+            // 添加工具条
+            if (AMap.ToolBar) {
+                amap.addControl(new AMap.ToolBar({
+                    position: 'RT'  // 右上角
+                }));
+                console.log('工具条添加成功');
+            }
+            
+            // 添加鹰眼（可选）
+            if (AMap.HawkEye) {
+                amap.addControl(new AMap.HawkEye({
+                    opened: false  // 默认关闭
+                }));
+            }
+            
+            // 添加地图类型切换（可选）
+            if (AMap.MapType) {
+                amap.addControl(new AMap.MapType({
+                    defaultType: 0  // 默认普通地图
+                }));
+            }
+        });
+    } catch (e) {
+        console.log('部分地图控件加载失败，但不影响主要功能', e);
     }
-    
-    // 添加工具条
-    if (AMap.ToolBar) {
-        amap.addControl(new AMap.ToolBar({
-            position: 'RT'  // 右上角
-        }));
-    }
-    
-    // 添加鹰眼（可选）
-    if (AMap.HawkEye) {
-        amap.addControl(new AMap.HawkEye({
-            opened: false  // 默认关闭
-        }));
-    }
-    
-    // 添加地图类型切换（可选）
-    if (AMap.MapType) {
-        amap.addControl(new AMap.MapType({
-            defaultType: 0  // 默认普通地图
-        }));
-    }
-    // ========================================
+    // ============================================
     
     // 添加京津冀轮廓
     addRegionBoundary();
