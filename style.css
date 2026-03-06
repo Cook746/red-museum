@@ -3929,3 +3929,466 @@ html body div#ai-assistant::after {
         margin: 20px;
     }
 }
+/* ============================================
+   美化后的登录选项样式
+============================================ */
+
+/* 用户状态容器 */
+.user-status {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+/* ===== 未登录状态样式 ===== */
+.not-logged-in {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* 增强版登录按钮 */
+.login-btn-enhanced {
+    background: linear-gradient(135deg, #ff6b6b, #b71c1c);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 10px rgba(183, 28, 28, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-btn-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.login-btn-enhanced:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(183, 28, 28, 0.4);
+}
+
+.login-btn-enhanced:hover::before {
+    left: 100%;
+}
+
+.login-icon {
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+.login-btn-enhanced:hover .login-icon {
+    transform: rotate(10deg);
+}
+
+.login-arrow {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+}
+
+.login-btn-enhanced:hover .login-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* 注册按钮 */
+.register-btn-enhanced {
+    background: transparent;
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 6px 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.register-btn-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+.register-btn-enhanced:hover {
+    border-color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.register-btn-enhanced:hover::before {
+    width: 150px;
+    height: 150px;
+}
+
+/* ===== 已登录状态样式 ===== */
+.logged-in {
+    position: relative;
+}
+
+/* 用户资料卡片 */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 5px 15px 5px 5px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+}
+
+.user-profile:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 用户头像 */
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #b71c1c, #ff6b6b);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 用户信息 */
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+.user-badge {
+    color: #ffd700;
+    font-size: 11px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 12px;
+    display: inline-block;
+    width: fit-content;
+    margin-top: 2px;
+}
+
+.user-dropdown-icon {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.user-profile:hover .user-dropdown-icon {
+    transform: rotate(180deg);
+}
+
+/* 下拉菜单 */
+.user-dropdown-menu {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 240px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: dropdownSlide 0.3s ease;
+    z-index: 1000;
+    overflow: hidden;
+    border: 1px solid rgba(183, 28, 28, 0.1);
+}
+
+@keyframes dropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 下拉菜单头部 */
+.dropdown-header {
+    background: linear-gradient(135deg, #b71c1c, #8b0000);
+    color: white;
+    padding: 15px;
+}
+
+.dropdown-user-name {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.dropdown-user-level {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+/* 下拉菜单项 */
+.dropdown-items {
+    padding: 8px;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    color: #333;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+}
+
+.dropdown-item:hover {
+    background: #f5f5f5;
+    transform: translateX(5px);
+}
+
+.dropdown-item .item-icon {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+}
+
+/* 退出按钮特殊样式 */
+.dropdown-item.logout-item {
+    color: #e74c3c;
+}
+
+.dropdown-item.logout-item:hover {
+    background: #fee;
+}
+
+/* 分割线 */
+.dropdown-divider {
+    height: 1px;
+    background: #eee;
+    margin: 8px 0;
+}
+
+/* 下拉菜单显示动画 */
+.user-dropdown-menu.show {
+    display: block;
+}
+
+/* ===== 个人中心模态框 ===== */
+.profile-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 11000;
+    animation: fadeIn 0.3s ease;
+}
+
+.profile-content {
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.profile-header {
+    background: linear-gradient(135deg, #b71c1c, #8b0000);
+    color: white;
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.profile-header h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.profile-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.profile-body {
+    padding: 25px;
+}
+
+.profile-avatar-large {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #b71c1c, #ff6b6b);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 36px;
+    font-weight: bold;
+    margin: 0 auto 20px;
+    border: 4px solid white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.profile-info-item {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-info-label {
+    width: 100px;
+    color: #666;
+    font-weight: 500;
+}
+
+.profile-info-value {
+    flex: 1;
+    color: #333;
+    font-weight: 600;
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.profile-stat-item {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.profile-stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #b71c1c;
+}
+
+.profile-stat-label {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* 手机端适配 */
+@media (max-width: 768px) {
+    .user-status {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+    }
+    
+    .login-text {
+        display: none;
+    }
+    
+    .login-btn-enhanced {
+        padding: 8px 15px;
+    }
+    
+    .login-arrow {
+        display: none;
+    }
+    
+    .user-name {
+        max-width: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .user-badge {
+        display: none;
+    }
+    
+    .user-dropdown-menu {
+        width: 200px;
+        right: -10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .register-btn-enhanced {
+        display: none;
+    }
+    
+    .user-profile {
+        padding-right: 10px;
+    }
+    
+    .user-info {
+        display: none;
+    }
+    
+    .user-dropdown-icon {
+        display: none;
+    }
+}

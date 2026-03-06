@@ -4595,14 +4595,14 @@ function closeAuthModal() {
 }
 
 // 切换登录/注册模式
-function switchAuthMode() {
+function switchAuthMode(mode) {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
     const authTitle = document.getElementById('authTitle');
     const switchBtn = document.getElementById('authSwitchBtn');
     const switchText = document.getElementById('authSwitchText');
     
-    if (loginForm.style.display !== 'none') {
+    if (mode === 'register' || loginForm.style.display !== 'none') {
         // 切换到注册
         loginForm.style.display = 'none';
         registerForm.style.display = 'block';
@@ -4809,3 +4809,144 @@ document.addEventListener('DOMContentLoaded', function() {
         initAuthSystem();
     }, 500);
 });
+// ============================================
+// 美化登录选项的额外功能
+// ============================================
+
+// 切换用户菜单显示/隐藏
+function toggleUserMenu() {
+    const menu = document.getElementById('userMenu');
+    if (menu) {
+        if (menu.style.display === 'none' || menu.style.display === '') {
+            menu.style.display = 'block';
+            // 点击其他地方关闭菜单
+            setTimeout(() => {
+                document.addEventListener('click', closeUserMenuOnClickOutside);
+            }, 100);
+        } else {
+            menu.style.display = 'none';
+        }
+    }
+}
+
+// 点击外部关闭菜单
+function closeUserMenuOnClickOutside(event) {
+    const menu = document.getElementById('userMenu');
+    const profile = document.querySelector('.user-profile');
+    
+    if (menu && profile && !profile.contains(event.target) && !menu.contains(event.target)) {
+        menu.style.display = 'none';
+        document.removeEventListener('click', closeUserMenuOnClickOutside);
+    }
+}
+
+// 显示个人中心
+function showUserProfile() {
+    closeUserMenu();
+    
+    if (!currentUser) return;
+    
+    // 获取用户学习进度统计
+    const visitedCount = userProgress.visitedArtifacts.length;
+    const taskCount = userProgress.completedTasks.length;
+    const achievementCount = userProgress.collectedAchievements.length;
+    
+    const modalHTML = `
+        <div class="profile-modal" id="profileModal">
+            <div class="profile-content">
+                <div class="profile-header">
+                    <h2>个人中心</h2>
+                    <button onclick="closeProfileModal()" class="profile-close">&times;</button>
+                </div>
+                <div class="profile-body">
+                    <div class="profile-avatar-large">
+                        ${currentUser.username.charAt(0).toUpperCase()}
+                    </div>
+                    
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">用户名</span>
+                        <span class="profile-info-value">${currentUser.username}</span>
+                    </div>
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">注册时间</span>
+                        <span class="profile-info-value">${new Date(currentUser.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">上次登录</span>
+                        <span class="profile-info-value">${new Date(currentUser.lastLogin).toLocaleDateString()}</span>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <div class="profile-stat-item">
+                            <div class="profile-stat-number">${visitedCount}</div>
+                            <div class="profile-stat-label">参观文物</div>
+                        </div>
+                        <div class="profile-stat-item">
+                            <div class="profile-stat-number">${taskCount}</div>
+                            <div class="profile-stat-label">完成任务</div>
+                        </div>
+                        <div class="profile-stat-item">
+                            <div class="profile-stat-number">${achievementCount}</div>
+                            <div class="profile-stat-label">获得成就</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.body.style.overflow = 'hidden';
+}
+
+// 关闭个人中心
+function closeProfileModal() {
+    const modal = document.getElementById('profileModal');
+    if (modal) {
+        modal.remove();
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// 关闭用户菜单
+function closeUserMenu() {
+    const menu = document.getElementById('userMenu');
+    if (menu) {
+        menu.style.display = 'none';
+    }
+}
+
+// 显示设置
+function showSettings() {
+    closeUserMenu();
+    alert('设置功能开发中...\n\n后续将支持：\n• 修改密码\n• 头像上传\n• 通知设置');
+}
+
+// 修改原来的 updateUIForLoggedInUser 函数
+function updateUIForLoggedInUser() {
+    const notLoggedIn = document.getElementById('notLoggedIn');
+    const loggedIn = document.getElementById('loggedIn');
+    const displayUsername = document.getElementById('displayUsername');
+    const dropdownUsername = document.getElementById('dropdownUsername');
+    const userInitial = document.getElementById('userInitial');
+    const userPoints = document.getElementById('userPoints');
+    
+    if (currentUser) {
+        if (notLoggedIn) notLoggedIn.style.display = 'none';
+        if (loggedIn) loggedIn.style.display = 'block';
+        
+        // 更新用户名显示
+        if (displayUsername) displayUsername.textContent = currentUser.username;
+        if (dropdownUsername) dropdownUsername.textContent = currentUser.username;
+        if (userInitial) userInitial.textContent = currentUser.username.charAt(0).toUpperCase();
+        
+        // 计算并显示积分（示例：每个文物10分，每个任务20分，每个成就30分）
+        const points = (userProgress.visitedArtifacts.length * 10) + 
+                       (userProgress.completedTasks.length * 20) + 
+                       (userProgress.collectedAchievements.length * 30);
+        if (userPoints) userPoints.textContent = points;
+    } else {
+        if (notLoggedIn) notLoggedIn.style.display = 'flex';
+        if (loggedIn) loggedIn.style.display = 'none';
+    }
+}
